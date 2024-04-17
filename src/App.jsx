@@ -3,20 +3,12 @@ import { IoCheckmarkOutline } from "react-icons/io5";
 import { PiTrashSimpleLight } from "react-icons/pi";
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
+import { RiArrowGoBackFill } from "react-icons/ri";
 
 function App() {
   const [todo, setTodo] = useState("");
   const todos = useSelector(state => state.todos)
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem("todos")) || [];
-    dispatch({ type: 'SET_TODOS', payload: storedTodos })
-  }, [dispatch]);
-
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
 
   function handleChange(e) {
     setTodo(e.target.value);
@@ -28,7 +20,8 @@ function App() {
 
     const newTodo = {
       id: Date.now(),
-      text: todo
+      text: todo,
+      completed: false
     };
     dispatch({ type: 'ADD_TODO', payload: newTodo })
     setTodo("");
@@ -42,6 +35,11 @@ function App() {
     dispatch({ type: 'TOGGLE_TODO', payload: id })
   }
 
+  function returnTodo() {
+    const undoneTodos = todos.filter(todo => !todo.completed);
+    dispatch({ type: 'SET_TODOS', payload: undoneTodos });
+  }
+
   return (
     <>
       <div className='w-100 mx-auto'>
@@ -52,7 +50,6 @@ function App() {
             <button type="submit" className='w-11 h-11 rounded-xl text-center text-3xl text-white bg-violet-400 pb-2 transition duration-300 hover:bg-violet-700'>+</button>
           </form>
           <h5 className='text-white mb-4'>Tasks to do - {todos.length}</h5>
-
           {todos.map(todo => (
             <div key={todo.id} className='flex items-center justify-between w-full bg-dark-purple rounded-xl p-4 mb-5'>
               <h6 className={`text-violet-400 ${todo.completed ? 'line-through' : ''}`}>{todo.text}</h6>
@@ -62,10 +59,19 @@ function App() {
               </div>
             </div>
           ))}
+          <h1 className='text-white mb-3 mt-4'>Done - {todos.filter(todo => todo.completed).length}</h1>
+          {todos.filter(todo => todo.completed).map(todo => (
+            <div key={todo.id} className='flex items-center justify-between w-full bg-dark-purple rounded-xl p-4 mb-5'>
+              <h6 className='line-through text-[#78CFB0]'>{todo.text}</h6>
+              <div className='flex items-center gap-3'>
+                <RiArrowGoBackFill onClick={returnTodo} className='text-white font-xl mr-3 cursor-pointer hover:text-gray-500' />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>
   );
 }
 
-export default App;
+export default App
